@@ -15,11 +15,18 @@ model User {
   tasks     Task[]
 }
 
+enum TaskStatus {
+  TODO
+  INPROGRESS
+  DONE
+}
+
 model Task {
-  id        Int      @id @default(autoincrement())
-  title     String
-  completed Boolean  @default(false)
-  userId    String   @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String?
+  status      TaskStatus  @default(TODO)
+  userId      String      @db.Uuid
+  user        User        @relation(fields: [userId], references: [id])
+  createdAt   DateTime    @default(now())
 }

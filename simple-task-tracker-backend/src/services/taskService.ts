@@ -34,6 +34,12 @@ export async function deleteTask(id: number) {
   })
 }
 
+export async function getTaskById(id: number, userId: string) {
+  const task = await prisma.task.findUnique({ where: { id } })
+  if (!task || task.userId !== userId) return null
+  return task
+}
+
 export async function listTasksByStatus(userId: string) {
   const [todo, inProgress, done] = await Promise.all([
     prisma.task.findMany({ where: { userId, status: TaskStatus.TODO },        orderBy: { position: 'asc' } }),
@@ -77,3 +83,18 @@ export async function moveTask({ taskId, userId, toStatus, beforeId, afterId }: 
     })
   })
 }
+
+export async function countTasksByStatus(userId: string) {
+  const result = await prisma.task.groupBy({
+    by: ['status'],
+    where: { userId },
+    _count: { id: true }
+  })
+
+  return {
+    TODO: result.find(r => r.status === TaskStatus.TODO)?._count.id || 0,
+    INPROGRESS: result.find(r => r.status === TaskStatus.INPROGRESS)?._count.id || 0,
+    DONE: result.find(r => r.status === TaskStatus.DONE)?._count.id || 0
+  }
+}
+

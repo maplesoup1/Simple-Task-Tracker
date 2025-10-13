@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DB_URL")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -29,4 +29,8 @@ model Task {
   userId      String      @db.Uuid
   user        User        @relation(fields: [userId], references: [id])
   createdAt   DateTime    @default(now())
+  position    Decimal     @default(0)
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId, status, position])
 }

@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    @apply w-full h-full m-0 p-0;
+  }
+
+  html {
+    @apply overflow-hidden;
+  }
+
+  body {
+    @apply overflow-auto;
+  }
+}

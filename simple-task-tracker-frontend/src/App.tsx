@@ -1,12 +1,13 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter } from 'react-router-dom';
+import PublicRoutes from './routers/PublicRoutes';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <div>task tracker</div>
-    </div>
+    <BrowserRouter>
+      <PublicRoutes />
+    </BrowserRouter>
   );
 }
 

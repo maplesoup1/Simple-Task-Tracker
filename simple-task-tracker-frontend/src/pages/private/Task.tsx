@@ -9,13 +9,15 @@ import TaskDetailModal from '../../components/taskDetailModal'
 const Task = () => {
   const {
     tasks,
+    loading,
+    error,
     addTask,
     deleteTask,
     updateTask,
     moveTask,
     getTasksByStatus,
     getTaskById
-  } = useTasks([])
+  } = useTasks()
 
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
@@ -56,6 +58,34 @@ const Task = () => {
     { title: 'Done', status: 'DONE' }
   ]
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-lg">Loading tasks...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md">
+          <div className="text-red-600 text-xl font-semibold mb-4">Error</div>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
@@ -63,7 +93,7 @@ const Task = () => {
           <h1 className="text-3xl font-bold text-gray-800">Task Board</h1>
           <button
             onClick={() => setIsAddFormOpen(true)}
-            className="bg-black text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+            className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

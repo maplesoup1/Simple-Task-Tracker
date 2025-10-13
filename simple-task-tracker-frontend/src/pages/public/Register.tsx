@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import heroImage from '../../assets/hero.png';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { signup } = useAuth();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await signup(email, password, name);
+      navigate('/tasks');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex">
@@ -19,11 +49,19 @@ const Register = () => {
           </div>
 
           {/* Register Form */}
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             <div>
               <input
                 type="text"
                 placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
               />
             </div>
@@ -32,6 +70,9 @@ const Register = () => {
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
               />
             </div>
@@ -40,12 +81,32 @@ const Register = () => {
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
                 className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
               />
             </div>
 
-            <button className="w-full bg-black text-white py-4 px-8 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors">
-              Sign Up
+            <div>
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-black text-white py-4 px-8 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Signing up...' : 'Sign Up'}
             </button>
 
             <p className="text-gray-600 text-base">
@@ -55,7 +116,7 @@ const Register = () => {
             <p onClick={() => navigate('/')} className="text-gray-600 text-base cursor-pointer hover:underline">
               ← Back to home
             </p>
-          </div>
+          </form>
         </div>
       </div>
 

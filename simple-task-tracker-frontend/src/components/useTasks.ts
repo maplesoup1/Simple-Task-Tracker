@@ -1,53 +1,108 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Task } from './types'
+import * as taskService from '../services/taskService'
 
-export const useTasks = (initialTasks: Task[] = []) => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [nextId, setNextId] = useState(
-    initialTasks.length > 0 ? Math.max(...initialTasks.map(t => t.id)) + 1 : 1
-  )
+export const useTasks = () => {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const addTask = useCallback((taskData: Omit<Task, 'id'>) => {
-    const newTask: Task = {
-      ...taskData,
-      id: nextId
+  // Fetch tasks from API
+  const fetchTasks = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await taskService.getTasks()
+      // Flatten the response into a single array
+      const allTasks = [
+        ...response.TODO,
+        ...response.INPROGRESS,
+        ...response.DONE,
+      ]
+      setTasks(allTasks)
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch tasks')
+      console.error('Error fetching tasks:', err)
+    } finally {
+      setLoading(false)
     }
-    setTasks(prev => [...prev, newTask])
-    setNextId(prev => prev + 1)
-  }, [nextId])
-
-  const deleteTask = useCallback((taskId: number) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId))
   }, [])
 
-  const updateTask = useCallback((taskId: number, updates: Partial<Omit<Task, 'id'>>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, ...updates } : task
-    ))
-  }, [])
+  // Load tasks on mount
+  useEffect(() => {
+    fetchTasks()
+  }, [fetchTasks])
 
-  const moveTask = useCallback((taskId: number, newStatus: Task['status']) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, status: newStatus } : task
-    ))
-  }, [])
+  // Add task
+  const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'status'>) => {
+    try {
+      await taskService.createTask(taskData.title, taskData.description)
+      await fetchTasks() // Refetch to get updated list
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to create task')
+      throw err
+    }
+  }, [fetchTasks])
 
+  // Delete task
+  const deleteTask = useCallback(async (taskId: number) => {
+    try {
+      await taskService.deleteTask(taskId)
+      await fetchTasks() // Refetch to get updated list
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to delete task')
+      throw err
+    }
+  }, [fetchTasks])
+
+  // Update task
+  const updateTask = useCallback(async (
+    taskId: number,
+    updates: { title?: string; description?: string }
+  ) => {
+    try {
+      await taskService.updateTask(taskId, updates)
+      await fetchTasks() // Refetch to get updated list
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update task')
+      throw err
+    }
+  }, [fetchTasks])
+
+  // Move task (drag and drop)
+  const moveTask = useCallback(async (
+    taskId: number,
+    newStatus: Task['status']
+  ) => {
+    try {
+      await taskService.moveTask(taskId, newStatus)
+      await fetchTasks() // Refetch to get updated list
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to move task')
+      throw err
+    }
+  }, [fetchTasks])
+
+  // Get tasks by status
   const getTasksByStatus = useCallback((status: Task['status']) => {
     return tasks.filter(task => task.status === status)
   }, [tasks])
 
+  // Get task by ID
   const getTaskById = useCallback((taskId: number) => {
     return tasks.find(task => task.id === taskId)
   }, [tasks])
 
   return {
     tasks,
+    loading,
+    error,
     addTask,
     deleteTask,
     updateTask,
     moveTask,
     getTasksByStatus,
     getTaskById,
-    setTasks
+    refetch: fetchTasks,
   }
 }

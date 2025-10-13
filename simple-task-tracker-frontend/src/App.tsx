@@ -1,14 +1,18 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import PublicRoutes from './routers/PublicRoutes';
-import './App.css';
+import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import PublicRoutes from './routers/PublicRoutes'
+import PrivateRoutes from './routers/PrivateRoutes'
+import PopupProvider from './components/popupProvider'
 
 function App() {
   return (
     <BrowserRouter>
-      <PublicRoutes />
+      <PopupProvider>
+        <PublicRoutes />
+        <PrivateRoutes />
+      </PopupProvider>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App

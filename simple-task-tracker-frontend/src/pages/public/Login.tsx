@@ -45,7 +45,7 @@ const Login = () => {
             </p>
 
             <p onClick={() => navigate('/')} className="text-gray-600 text-base cursor-pointer hover:underline">
-              ê Back to home
+               ‚Üê Back to home
             </p>
           </div>
         </div>

@@ -23,7 +23,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/tasks', taskRoutes)
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
 

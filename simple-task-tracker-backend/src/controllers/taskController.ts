@@ -16,7 +16,12 @@ export async function createTask(req: Request, res: Response): Promise<void> {
     const task = await taskService.createTask(userId, title, description)
     res.status(201).json(task)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create task' })
+    console.error('Prisma createTask error:', error)
+    res.status(500).json({
+      error: 'Failed to create task',
+      details: error instanceof Error ? error.message : String(error),
+      prismaError: error
+    })
   }
 }
 
@@ -24,10 +29,15 @@ export async function createTask(req: Request, res: Response): Promise<void> {
 export async function listTasks(req: Request, res: Response): Promise<void> {
   try {
     const userId = req.userId!
+    console.log('Fetching tasks for userId:', userId)
     const tasks = await taskService.listTasksByStatus(userId)
     res.json(tasks)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch tasks' })
+    console.error('Error fetching tasks:', error)
+    res.status(500).json({
+      error: 'Failed to fetch tasks',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
 

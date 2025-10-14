@@ -10,7 +10,6 @@ interface AddTaskFormProps {
 const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen }) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [status, setStatus] = useState<'TODO' | 'INPROGRESS' | 'DONE'>('TODO')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,20 +19,18 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen })
     onAddTask({
       title: title.trim(),
       description: description.trim() || undefined,
-      status
+      status: 'TODO'
     })
 
     // Reset form
     setTitle('')
     setDescription('')
-    setStatus('TODO')
     onClose()
   }
 
   const handleCancel = () => {
     setTitle('')
     setDescription('')
-    setStatus('TODO')
     onClose()
   }
 
@@ -79,21 +76,6 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen })
               placeholder="Enter task description"
               rows={4}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as 'TODO' | 'INPROGRESS' | 'DONE')}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            >
-              <option value="TODO">To Do</option>
-              <option value="INPROGRESS">In Progress</option>
-              <option value="DONE">Done</option>
-            </select>
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -13,8 +13,8 @@ export async function signup(email: string, password: string, name?: string) {
     throw new Error('Failed to create user');
   }
 
-  // Create user in our database
-  const user = await userService.createUser(data.user.id, name);
+  // Sync user to our database (idempotent upsert)
+  const user = await userService.syncUser(data.user.id, email, name);
 
   return {
     user,

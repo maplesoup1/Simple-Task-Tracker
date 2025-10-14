@@ -17,6 +17,19 @@ export interface AuthResponse {
   token: string
 }
 
+// Sync user to backend database
+const syncUserToBackend = async (token: string): Promise<void> => {
+  try {
+    await apiClient.post('/auth/sync', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+  } catch (error) {
+    console.error('Failed to sync user to backend:', error)
+  }
+}
+
 // Sign up new user
 export const signup = async (email: string, password: string, name?: string): Promise<AuthResponse> => {
   const response = await apiClient.post('/auth/signup', {
@@ -30,6 +43,8 @@ export const signup = async (email: string, password: string, name?: string): Pr
   if (session?.access_token) {
     localStorage.setItem('auth_token', session.access_token)
     localStorage.setItem('user', JSON.stringify(user))
+    // Sync user to backend database
+    await syncUserToBackend(session.access_token)
   }
 
   return {
@@ -50,6 +65,8 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   if (session?.access_token) {
     localStorage.setItem('auth_token', session.access_token)
     localStorage.setItem('user', JSON.stringify(user))
+    // Sync user to backend database
+    await syncUserToBackend(session.access_token)
   }
 
   return {

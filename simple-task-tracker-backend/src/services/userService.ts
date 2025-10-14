@@ -7,6 +7,15 @@ export async function createUser(id: string, name?: string) {
   });
 }
 
+// Idempotent user sync - upsert user from Supabase
+export async function syncUser(id: string, email: string, name?: string) {
+  return await prisma.user.upsert({
+    where: { id },
+    update: { email, name },
+    create: { id, email, name }
+  });
+}
+
 export async function getUserById(id: string) {
   return await prisma.user.findUnique({
     where: { id },

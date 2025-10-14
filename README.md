@@ -3,139 +3,206 @@
 
 ## Features & workflow
 
-
-SIGNUP WORKFLOW                            
-sequenceDiagram
-    autonumber
-    participant R as Register.tsx
-    participant AFS as authService.ts (frontend)
-    participant AR as /api/auth/signup
-    participant VR as authRoutes.ts
-    participant AC as authController.ts
-    participant AS as authService.ts (backend)
-    participant SU as supabase.auth
-    participant US as userService.ts
-    participant DB as PostgreSQL (public.User)
-    participant L as localStorage
-    participant SYNC as /api/auth/sync
-    participant AC2 as authController.ts (sync)
-    participant SU2 as supabase.auth.getUser
-    participant US2 as userService.ts (sync)
-    participant Ctx as AuthContext.tsx
-    participant Nav as Router (/tasks)
-
-    R->>AFS: signup(email, password, name)
-    AFS->>AR: POST /api/auth/signup
-    AR->>VR: validate(signupSchema)
-    VR->>AC: forward
-    AC->>AS: signup()
-    AS->>SU: supabase.auth.signUp()
-    SU-->>AS: { user, session, JWT }
-    AS->>US: userService.syncUser()
-    US->>DB: prisma.user.upsert()
-    DB-->>US: upserted user
-    US-->>AS: user
-    AS-->>AC: { user, session }
-    AC-->>AFS: { user, session }
-
-    AFS->>L: localStorage.setItem(user, token)
-    AFS->>SYNC: POST /api/auth/sync
-    SYNC->>AC2: syncUser()
-    AC2->>SU2: supabase.auth.getUser()
-    SU2-->>AC2: user
-    AC2->>US2: prisma.user.upsert()
-    US2->>DB: upsert
-    DB-->>US2: ok
-    AC2-->>AFS: synced user
-
-    AFS-->>Ctx: setUser(user)
-    Ctx-->>Nav: navigate("/tasks")
-
-LOGIN Workflow
-sequenceDiagram
-    autonumber
-    participant Lg as Login.tsx
-    participant AFS as authService.ts (frontend)
-    participant AL as /api/auth/login
-    participant VR as authRoutes.ts
-    participant AC as authController.ts
-    participant AS as authService.ts (backend)
-    participant SU as supabase.auth
-    participant L as localStorage
-    participant SYNC as /api/auth/sync
-    participant AC2 as authController.ts (sync)
-    participant SU2 as supabase.auth.getUser
-    participant US as userService.ts
-    participant DB as PostgreSQL
-    participant Ctx as AuthContext.tsx
-    participant Nav as Router (/tasks)
-
-    Lg->>AFS: login(email, password)
-    AFS->>AL: POST /api/auth/login
-    AL->>VR: validate(loginSchema)
-    VR->>AC: forward
-    AC->>AS: login()
-    AS->>SU: signInWithPassword()
-    SU-->>AS: { user, session, JWT }
-    AS-->>AC: { user, session }
-    AC-->>AFS: { user, session }
-
-    AFS->>L: localStorage.setItem(user, token)
-    AFS->>SYNC: POST /api/auth/sync
-    SYNC->>AC2: syncUser()
-    AC2->>SU2: supabase.auth.getUser()
-    SU2-->>AC2: user
-    AC2->>US: prisma.user.upsert()
-    US->>DB: upsert
-    DB-->>US: ok
-    AC2-->>AFS: synced user
-
-    AFS-->>Ctx: setUser(user)
-    Ctx-->>Nav: navigate("/tasks")
+Register.tsx
+  |
+  | signup(email, password, name)
+  v
+authService.ts [FE]
+  |
+  | POST /api/auth/signup
+  v
+authRoutes.ts
+  |
+  | validate(signupSchema)
+  v
+authController.ts
+  |
+  | signup()
+  v
+authService.ts [BE]
+  |-------------------------------------> supabase.auth.signUp()
+  |                                       (create auth.users, issue JWT)
+  |<-------------------------------------
+  |
+  | userService.syncUser()
+  v
+userService.ts
+  |
+  | prisma.user.upsert()
+  v
+PostgreSQL (public.User)
+  ^
+  |
+  +---------------------- back to authService.ts [BE]
+                             |
+                             | return { user, session }
+                             v
+authController.ts
+  |
+  | return to client
+  v
+authService.ts [FE]
+  |
+  | localStorage.setItem(user, token)
+  | POST /api/auth/sync
+  v
+(authController.ts - syncUser)
+  |
+  | supabase.auth.getUser()
+  v
+supabase.auth
+  |
+  | user
+  v
+(authController.ts - syncUser)
+  |
+  | prisma.user.upsert()
+  v
+PostgreSQL
+  ^
+  |
+  +---------------------- synced user to client
+                             v
+authService.ts [FE]
+  |
+  | setUser(user)
+  v
+AuthContext.tsx
+  |
+  | navigate("/tasks")
+  v
+Router
 
 
-Protected workflow
+Login workflow
 
-sequenceDiagram
-    autonumber
-    participant Lg as Login.tsx
-    participant AFS as authService.ts (frontend)
-    participant AL as /api/auth/login
-    participant VR as authRoutes.ts
-    participant AC as authController.ts
-    participant AS as authService.ts (backend)
-    participant SU as supabase.auth
-    participant L as localStorage
-    participant SYNC as /api/auth/sync
-    participant AC2 as authController.ts (sync)
-    participant SU2 as supabase.auth.getUser
-    participant US as userService.ts
-    participant DB as PostgreSQL
-    participant Ctx as AuthContext.tsx
-    participant Nav as Router (/tasks)
+Login.tsx
+  |
+  | login(email, password)
+  v
+authService.ts [FE]
+  |
+  | POST /api/auth/login
+  v
+authRoutes.ts
+  |
+  | validate(loginSchema)
+  v
+authController.ts
+  |
+  | login()
+  v
+authService.ts [BE]
+  |-------------------------------------> supabase.auth.signInWithPassword()
+  |                                       (verify password, issue JWT)
+  |<-------------------------------------
+  |
+  | return { user, session }
+  v
+authController.ts
+  |
+  | return to client
+  v
+authService.ts [FE]
+  |
+  | localStorage.setItem(user, token)
+  | POST /api/auth/sync
+  v
+(authController.ts - syncUser)
+  |
+  | supabase.auth.getUser()
+  v
+supabase.auth
+  |
+  | user
+  v
+(authController.ts - syncUser)
+  |
+  | prisma.user.upsert()
+  v
+PostgreSQL
+  ^
+  |
+  +---------------------- synced user to client
+                             v
+authService.ts [FE]
+  |
+  | setUser(user)
+  v
+AuthContext.tsx
+  |
+  | navigate("/tasks")
+  v
+Router
 
-    Lg->>AFS: login(email, password)
-    AFS->>AL: POST /api/auth/login
-    AL->>VR: validate(loginSchema)
-    VR->>AC: forward
-    AC->>AS: login()
-    AS->>SU: signInWithPassword()
-    SU-->>AS: { user, session, JWT }
-    AS-->>AC: { user, session }
-    AC-->>AFS: { user, session }
+Protected request
+Task.tsx
+  |
+  | useTasks()
+  v
+taskService.ts [FE]
+  |
+  | GET /api/tasks
+  | Header: Authorization: Bearer <token>
+  v
+app.ts  ->  taskRoutes
+  |
+  | router.use(requireAuth)
+  v
+requireAuth.ts
+  |
+  | supabase.auth.getUser(token)
+  v
+supabase.auth
+  |
+  | validated (JWT OK)
+  v
+requireAuth.ts
+  |
+  | userService.syncUser()
+  v
+userService.ts
+  |
+  | prisma.user.upsert()
+  v
+PostgreSQL (public.User)
+  ^
+  |
+  +---------------------- back to requireAuth.ts
+                             |
+                             | req.userId = user.id; next()
+                             v
+taskController.ts
+  |
+  | listTasks()
+  v
+taskService.ts [BE]
+  |
+  | prisma.task.findMany({ userId })
+  v
+PostgreSQL (public.Task)
+  |
+  | rows -> grouped { TODO, INPROGRESS, DONE }
+  v
+taskService.ts [BE]
+  |
+  | payload
+  v
+taskController.ts
+  |
+  | response { TODO: [...], INPROGRESS: [...], DONE: [...] }
+  v
+taskService.ts [FE]
+  |
+  | -> useTasks()
+  v
+Task.tsx
+  |
+  | render 3 columns
+  v
+UI
 
-    AFS->>L: localStorage.setItem(user, token)
-    AFS->>SYNC: POST /api/auth/sync
-    SYNC->>AC2: syncUser()
-    AC2->>SU2: supabase.auth.getUser()
-    SU2-->>AC2: user
-    AC2->>US: prisma.user.upsert()
-    US->>DB: upsert
-    DB-->>US: ok
-    AC2-->>AFS: synced user
 
-    AFS-->>Ctx: setUser(user)
-    Ctx-->>Nav: navigate("/tasks")
 
 
 - **UI** -https://www.figma.com/community/file/1474180067272970933/task-tracker original design

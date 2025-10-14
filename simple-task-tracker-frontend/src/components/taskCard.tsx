@@ -8,9 +8,10 @@ interface TaskCardProps {
   index: number
   onDelete: (id: number) => void
   onTaskClick?: (id: number) => void
+  isDragDisabled?: boolean
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, index, onDelete, onTaskClick }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, index, onDelete, onTaskClick, isDragDisabled = false }) => {
   const { confirm } = usePopup()
   const getCardColors = () => {
     switch (task.status) {
@@ -62,14 +63,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, index, onDelete, onTaskClick 
   }
 
   return (
-    <Draggable draggableId={task.id.toString()} index={index}>
+    <Draggable draggableId={task.id.toString()} index={index} isDragDisabled={isDragDisabled}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={handleCardClick}
-          className={`relative border-2 ${container} rounded-2xl p-6 mb-3 shadow-lg transition-all cursor-pointer hover:shadow-xl hover:scale-105 ${
+          className={`relative border-2 ${container} rounded-2xl p-6 mb-3 shadow-lg transition-all ${
+            isDragDisabled ? 'cursor-pointer' : 'cursor-move hover:shadow-xl hover:scale-105'
+          } ${
             snapshot.isDragging ? 'rotate-2 shadow-2xl scale-110' : ''
           }`}
         >

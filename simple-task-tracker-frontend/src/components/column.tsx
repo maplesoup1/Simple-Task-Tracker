@@ -10,9 +10,10 @@ interface ColumnProps {
   totalTaskCount: number
   onDelete: (id: number) => void
   onTaskClick?: (id: number) => void
+  isDragDisabled?: boolean
 }
 
-const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, onDelete, onTaskClick }) => {
+const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, onDelete, onTaskClick, isDragDisabled = false }) => {
   const getColumnColor = () => {
     switch (status) {
       case 'TODO':
@@ -63,19 +64,19 @@ const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, o
         </div>
       </div>
       
-      <Droppable droppableId={status}>
+      <Droppable droppableId={status} isDropDisabled={isDragDisabled}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`p-4 min-h-96 transition-colors ${
               snapshot.isDraggingOver ? 'bg-blue-50' : ''
-            }`}
+            } ${isDragDisabled ? 'opacity-75' : ''}`}
           >
             {tasks.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500 text-sm">No tasks yet</p>
-                <p className="text-gray-400 text-xs">Drag a task here or create a new one</p>
+                <p className="text-gray-400 text-xs">{isDragDisabled ? 'No matching tasks' : 'Drag a task here or create a new one'}</p>
               </div>
             )}
             {tasks.map((task, index) => (
@@ -85,6 +86,7 @@ const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, o
                 index={index}
                 onDelete={onDelete}
                 onTaskClick={onTaskClick}
+                isDragDisabled={isDragDisabled}
               />
             ))}
             {provided.placeholder}

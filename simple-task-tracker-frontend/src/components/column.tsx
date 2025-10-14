@@ -54,7 +54,7 @@ const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, o
   }
 
   return (
-    <div className={`flex-1 mx-2 ${getColumnColor()} border-2 rounded-xl`}>
+    <div className={`flex-1 min-w-0 w-full mx-2 ${getColumnColor()} border-2 rounded-xl`}>
       <div className={`${getHeaderColor()} p-4 rounded-t-lg flex justify-between items-center`}>
         <h2 className="text-lg font-semibold">{title}</h2>
         <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, o
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`p-4 min-h-96 transition-colors ${
+            className={`p-4 min-h-[400px] transition-colors ${
               snapshot.isDraggingOver ? 'bg-blue-50' : ''
             } ${isDragDisabled ? 'opacity-75' : ''}`}
           >

@@ -35,39 +35,70 @@ export const useTasks = () => {
 
   // Add task
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'status'>) => {
+    // Create a temporary task with a temporary ID
+    const tempId = -Date.now() // Use negative timestamp as temp ID
+    const tempTask: Task = {
+      id: tempId,
+      title: taskData.title,
+      description: taskData.description,
+      status: 'TODO'
+    }
+
+    // Optimistic update: add task to UI immediately
+    setTasks(prevTasks => [...prevTasks, tempTask])
+
     try {
-      await taskService.createTask(taskData.title, taskData.description)
-      await fetchTasks() // Refetch to get updated list
+      const newTask = await taskService.createTask(taskData.title, taskData.description)
+      // Replace temp task with real task from server
+      setTasks(prevTasks =>
+        prevTasks.map(task => task.id === tempId ? newTask : task)
+      )
     } catch (err: any) {
+      // Rollback on error: remove temp task
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== tempId))
       setError(err.response?.data?.error || 'Failed to create task')
       throw err
     }
-  }, [fetchTasks])
+  }, [])
 
   // Delete task
   const deleteTask = useCallback(async (taskId: number) => {
+    // Optimistic update: remove task from UI immediately
+    const previousTasks = [...tasks]
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId))
+
     try {
       await taskService.deleteTask(taskId)
-      await fetchTasks() // Refetch to get updated list
     } catch (err: any) {
+      // Rollback on error: restore the task
+      setTasks(previousTasks)
       setError(err.response?.data?.error || 'Failed to delete task')
       throw err
     }
-  }, [fetchTasks])
+  }, [tasks])
 
   // Update task
   const updateTask = useCallback(async (
     taskId: number,
     updates: { title?: string; description?: string }
   ) => {
+    // Optimistic update: update task in UI immediately
+    const previousTasks = [...tasks]
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, ...updates } : task
+      )
+    )
+
     try {
       await taskService.updateTask(taskId, updates)
-      await fetchTasks() // Refetch to get updated list
     } catch (err: any) {
+      // Rollback on error
+      setTasks(previousTasks)
       setError(err.response?.data?.error || 'Failed to update task')
       throw err
     }
-  }, [fetchTasks])
+  }, [tasks])
 
   // Move task (drag and drop)
   const moveTask = useCallback(async (

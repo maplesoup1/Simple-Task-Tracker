@@ -28,7 +28,11 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect on 401 if we're not on auth endpoints and user was previously authenticated
+    const isAuthEndpoint = error.config?.url?.includes('/auth/')
+    const wasAuthenticated = !!localStorage.getItem('auth_token')
+
+    if (error.response?.status === 401 && !isAuthEndpoint && wasAuthenticated) {
       // Token expired or invalid, clear auth state
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')

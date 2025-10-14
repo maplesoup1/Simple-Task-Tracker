@@ -13,10 +13,43 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const validatePassword = (pwd: string): string[] => {
+    const errors: string[] = [];
+
+    if (pwd.length < 8) {
+      errors.push('At least 8 characters');
+    }
+    if (!/[A-Z]/.test(pwd)) {
+      errors.push('One uppercase letter');
+    }
+    if (!/[a-z]/.test(pwd)) {
+      errors.push('One lowercase letter');
+    }
+    if (!/[0-9]/.test(pwd)) {
+      errors.push('One number');
+    }
+
+    return errors;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordErrors(validatePassword(newPassword));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate password complexity
+    const errors = validatePassword(password);
+    if (errors.length > 0) {
+      setError(`Password must contain: ${errors.join(', ')}`);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -82,11 +115,29 @@ const Register = () => {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
-                minLength={8}
                 className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
               />
+              {password && passwordErrors.length > 0 && (
+                <div className="mt-2 px-4 text-sm text-gray-600">
+                  <p className="font-medium mb-1">Password must contain:</p>
+                  <ul className="space-y-1">
+                    <li className={password.length >= 8 ? 'text-green-600' : 'text-red-600'}>
+                      • At least 8 characters
+                    </li>
+                    <li className={/[A-Z]/.test(password) ? 'text-green-600' : 'text-red-600'}>
+                      • One uppercase letter
+                    </li>
+                    <li className={/[a-z]/.test(password) ? 'text-green-600' : 'text-red-600'}>
+                      • One lowercase letter
+                    </li>
+                    <li className={/[0-9]/.test(password) ? 'text-green-600' : 'text-red-600'}>
+                      • One number
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div>
@@ -96,7 +147,6 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                minLength={8}
                 className="w-full px-6 py-4 rounded-full border border-gray-300 focus:outline-none focus:border-black text-lg"
               />
             </div>

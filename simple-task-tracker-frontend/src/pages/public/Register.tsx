@@ -12,6 +12,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
@@ -43,6 +44,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     // Validate password complexity
     const errors = validatePassword(password);
@@ -60,7 +62,8 @@ const Register = () => {
 
     try {
       await signup(email, password, name);
-      navigate('/tasks');
+      setSuccess('Account created successfully! Redirecting...');
+      setTimeout(() => navigate('/tasks'), 1000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
@@ -86,6 +89,11 @@ const Register = () => {
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 text-green-600 px-4 py-3 rounded-lg text-sm">
+                {success}
               </div>
             )}
 

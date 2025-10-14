@@ -10,16 +10,19 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
       await login(email, password);
-      navigate('/tasks');
+      setSuccess('Login successful! Redirecting...');
+      setTimeout(() => navigate('/tasks'), 1000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
@@ -45,6 +48,11 @@ const Login = () => {
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 text-green-600 px-4 py-3 rounded-lg text-sm">
+                {success}
               </div>
             )}
 

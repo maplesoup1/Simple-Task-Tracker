@@ -6,8 +6,7 @@ import PopupProvider from '../components/popupProvider';
 import { Task } from '../components/types';
 
 jest.mock('../components/popupProvider', () => ({
-  __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ...jest.requireActual('../components/popupProvider'),
   usePopup: () => ({
     confirm: jest.fn().mockResolvedValue(true),
   }),

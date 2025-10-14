@@ -26,6 +26,7 @@ const Task = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false)
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleOnDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result
@@ -64,6 +65,21 @@ const Task = () => {
       await logout()
     }
   }
+
+  // Filter tasks by search query
+  const filterTasks = (status: TaskType['status']) => {
+    const tasksInStatus = getTasksByStatus(status)
+    if (!searchQuery.trim()) {
+      return tasksInStatus
+    }
+    const lowerQuery = searchQuery.toLowerCase()
+    return tasksInStatus.filter(task =>
+      task.title.toLowerCase().includes(lowerQuery) ||
+      (task.description && task.description.toLowerCase().includes(lowerQuery))
+    )
+  }
+
+  const isDragDisabled = searchQuery.trim().length > 0
 
   const selectedTask = selectedTaskId ? getTaskById(selectedTaskId) : null
 
@@ -106,7 +122,7 @@ const Task = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Task Board</h1>
           <div className="flex gap-3">
             <button
@@ -130,6 +146,42 @@ const Task = () => {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tasks by title or description..."
+              className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {isDragDisabled && (
+            <p className="mt-2 text-sm text-gray-600 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Drag and drop is disabled while filtering. Clear search to enable.
+            </p>
+          )}
+        </div>
+
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <div className="flex gap-4">
             {columnsConfig.map(({ title, status }) => (
@@ -137,10 +189,11 @@ const Task = () => {
                 key={status}
                 title={title}
                 status={status}
-                tasks={getTasksByStatus(status)}
+                tasks={filterTasks(status)}
                 totalTaskCount={totalTaskCount}
                 onDelete={deleteTask}
                 onTaskClick={handleTaskClick}
+                isDragDisabled={isDragDisabled}
               />
             ))}
           </div>

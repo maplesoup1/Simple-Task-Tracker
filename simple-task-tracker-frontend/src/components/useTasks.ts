@@ -74,14 +74,23 @@ export const useTasks = () => {
     taskId: number,
     newStatus: Task['status']
   ) => {
+    // Optimistic update: update UI immediately
+    const previousTasks = [...tasks]
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      )
+    )
+
     try {
       await taskService.moveTask(taskId, newStatus)
-      await fetchTasks() // Refetch to get updated list
     } catch (err: any) {
+      // Rollback on error
+      setTasks(previousTasks)
       setError(err.response?.data?.error || 'Failed to move task')
       throw err
     }
-  }, [fetchTasks])
+  }, [tasks])
 
   // Get tasks by status
   const getTasksByStatus = useCallback((status: Task['status']) => {

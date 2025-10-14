@@ -2,196 +2,36 @@
 
 
 ## Features & workflow
-
-╔════════════════════════════════════════════════════════════════════════════╗
-║                          SIGNUP WORKFLOW                                   ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
+Signup workflow
 Register.tsx
-     │
-     │ signup(email, password, name)
-     ▼
-authService.ts
-     │
-     │ POST /api/auth/signup
-     ▼
-                              authRoutes.ts
-                                   │
-                                   │ validate(signupSchema)
-                                   ▼
-                              authController.ts
-                                   │
-                                   │ signup()
-                                   ▼
-                              authService.ts
-                                   │
-                                   ├──────────────────────────────> supabase.auth.signUp()
-                                   │                                       │
-                                   │                                       │ Create auth.users
-                                   │                                       │ Generate JWT
-                                   │<──────────────────────────────────────┘
-                                   │
-                                   │ userService.syncUser()
-                                   ▼
-                              userService.ts
-                                   │
-                                   │ prisma.user.upsert()
-                                   ├──────────────────────────────> PostgreSQL
-                                   │                                 public.User table
-                                   │<──────────────────────────────────────┘
-                                   │
-     ┌─────────────────────────────┘
-     │ { user, session }
-     ▼
-authService.ts
-     │
-     │ localStorage.setItem()
-     │
-     │ POST /api/auth/sync
-     │
-     ├──────────────────────────> authController.ts
-                                        │
-                                        │ syncUser()
-                                        ▼
-                                   supabase.auth.getUser()
-                                        │
-                                        ▼
-                                   userService.ts
-                                        │
-                                        │ prisma.user.upsert()
-                                        ▼
-                                   PostgreSQL
-     ▼
-AuthContext.tsx
-     │
-     │ setUser(user)
-     ▼
-Navigate to /tasks
-
-
-╔════════════════════════════════════════════════════════════════════════════╗
-║                           LOGIN WORKFLOW                                   ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
+  → authService.ts (frontend): signup(email, password, name)
+  → POST /api/auth/signup
+  → authRoutes.ts: validate(signupSchema)
+  → authController.ts: signup()
+  → authService.ts (backend): supabase.auth.signUp()
+  → Supabase: create auth.users + issue JWT
+  → userService.syncUser() → Prisma upsert → PostgreSQL (public.User)
+  → return { user, session } to client
+  → authService.ts (frontend): localStorage.setItem(...)
+  → POST /api/auth/sync
+  → authController.ts (sync): supabase.auth.getUser() → Prisma upsert → PostgreSQL
+  → AuthContext.setUser(user)
+  → navigate('/tasks')
+Login work flow
 Login.tsx
-     │
-     │ login(email, password)
-     ▼
-authService.ts
-     │
-     │ POST /api/auth/login
-     ▼
-                              authRoutes.ts
-                                   │
-                                   │ validate(loginSchema)
-                                   ▼
-                              authController.ts
-                                   │
-                                   │ login()
-                                   ▼
-                              authService.ts
-                                   │
-                                   ├──────────────────────────────> supabase.auth.signInWithPassword()
-                                   │                                       │
-                                   │                                       │ Verify password
-                                   │                                       │ Generate JWT
-                                   │<──────────────────────────────────────┘
-                                   │
-     ┌─────────────────────────────┘
-     │ { user, session }
-     ▼
-authService.ts
-     │
-     │ localStorage.setItem()
-     │
-     │ POST /api/auth/sync
-     │
-     ├──────────────────────────> authController.ts
-                                        │
-                                        │ syncUser()
-                                        ▼
-                                   supabase.auth.getUser()
-                                        │
-                                        ▼
-                                   userService.ts
-                                        │
-                                        │ prisma.user.upsert()
-                                        ▼
-                                   PostgreSQL
-     ▼
-AuthContext.tsx
-     │
-     │ setUser(user)
-     ▼
-Navigate to /tasks
+  → authService.ts (frontend): login(email, password)
+  → POST /api/auth/login
+  → authRoutes.ts: validate(loginSchema)
+  → authController.ts: login()
+  → authService.ts (backend): supabase.auth.signInWithPassword()
+  → Supabase: verify password + issue JWT
+  → return { user, session } to client
+  → authService.ts (frontend): localStorage.setItem(...)
+  → POST /api/auth/sync
+  → authController.ts (sync): supabase.auth.getUser() → Prisma upsert → PostgreSQL
+  → AuthContext.setUser(user)
+  → navigate('/tasks')
 
-
-╔════════════════════════════════════════════════════════════════════════════╗
-║                    PROTECTED REQUEST (protected request)                   ║
-║                       Example: GET /api/tasks                              ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-Frontend                          Backend                         Supabase
-────────                          ───────                         ────────
-
-Task.tsx
-     │
-     │ useTasks()
-     ▼
-taskService.ts
-     │
-     │ GET /api/tasks
-     │ Header: Authorization: Bearer <token>
-     ▼
-                              app.ts
-                                   │
-                                   │ /api/tasks → taskRoutes
-                                   ▼
-                              taskRoutes.ts
-                                   │
-                                   │ router.use(requireAuth)
-                                   ▼
-                              requireAuth.ts
-                                   │
-                                   ├──────────────────────────────> supabase.auth.getUser(token)
-                                   │                                       │
-                                   │                                       │ Validate JWT
-                                   │<──────────────────────────────────────┘
-                                   │
-                                   │ userService.syncUser()
-                                   ▼
-                              userService.ts
-                                   │
-                                   │ prisma.user.upsert()
-                                   ├──────────────────────────────> PostgreSQL
-                                   │<──────────────────────────────────────┘
-                                   │
-                                   │ req.userId = user.id
-                                   │ next()
-                                   ▼
-                              taskController.ts
-                                   │
-                                   │ listTasks()
-                                   ▼
-                              taskService.ts
-                                   │
-                                   │ prisma.task.findMany()
-                                   ├──────────────────────────────> PostgreSQL
-                                   │                                 public.Task table
-                                   │<──────────────────────────────────────┘
-                                   │
-     ┌─────────────────────────────┘
-     │ { TODO: [...], INPROGRESS: [...], DONE: [...] }
-     ▼
-taskService.ts
-     ▼
-useTasks()
-     ▼
-Task.tsx
-     │
-     │ Render UI
-     ▼
-Display tasks in columns
 - **UI** -https://www.figma.com/community/file/1474180067272970933/task-tracker original design
 
 -https://www.figma.com/design/3kAT4ANXAbqXKvwNg6qsCf/TASK-TRACKER--Community-?node-id=0-1&p=f&t=L0WhGhPVWM1Q5Gbd-0 my simple version
@@ -226,6 +66,12 @@ link: https://github.com/hello-pangea/dnd
 - npm or yarn
 - Supabase account
 - PostgreSQL database (via Supabase)
+
+## design tradeoffs
+Temporarily disabling Supabase registration email verification.
+More like a personal task tracker, tasks cannot be shared among multiple users.
+Currently using the Context API; if functionality is expanded, Redux may be required.
+Currently refreshing data manually, not using Supabase Realtime.
 
 ## Installation
 
@@ -344,23 +190,76 @@ Simple Task Tracker/
 │   ├── prisma/
 │   │   └── schema.prisma
 │   ├── src/
+│   │   ├── __tests__/
+│   │   │   ├── setup.ts
+│   │   │   └── taskService.test.ts
+│   │   ├── config/
+│   │   │   └── swagger.ts
 │   │   ├── controllers/
-│   │   ├── services/
+│   │   │   ├── authController.ts
+│   │   │   ├── taskController.ts
+│   │   │   └── userController.ts
 │   │   ├── middlewares/
+│   │   │   ├── requireAuth.ts
+│   │   │   └── validate.ts
 │   │   ├── routes/
+│   │   │   ├── authRoutes.ts
+│   │   │   ├── taskRoutes.ts
+│   │   │   └── userRoutes.ts
+│   │   ├── services/
+│   │   │   ├── authService.ts
+│   │   │   ├── taskService.ts
+│   │   │   └── userService.ts
+│   │   ├── types/
+│   │   │   └── express.d.ts
 │   │   ├── utils/
+│   │   │   ├── prisma.ts
+│   │   │   ├── supabaseClient.ts
+│   │   │   └── validation.ts
+│   │   ├── app.ts
 │   │   └── server.ts
 │   └── package.json
 │
 └── simple-task-tracker-frontend/
     ├── public/
     ├── src/
+    │   ├── __tests__/
+    │   │   ├── addTaskForm.submit.test.tsx
+    │   │   ├── taskCard.render.test.tsx
+    │   │   ├── taskCard.todoStatus.test.tsx
+    │   │   ├── taskCard.inprogressStatus.test.tsx
+    │   │   └── taskCard.doneStatus.test.tsx
     │   ├── assets/
     │   ├── components/
+    │   │   ├── addTaskForm.tsx
+    │   │   ├── column.tsx
+    │   │   ├── confirmModal.tsx
+    │   │   ├── popupProvider.tsx
+    │   │   ├── PrivateRoute.tsx
+    │   │   ├── taskCard.tsx
+    │   │   ├── taskDetailModal.tsx
+    │   │   ├── types.ts
+    │   │   └── useTasks.ts
     │   ├── contexts/
+    │   │   └── AuthContext.tsx
     │   ├── pages/
+    │   │   ├── private/
+    │   │   │   └── Task.tsx
+    │   │   └── public/
+    │   │       ├── Hero.tsx
+    │   │       ├── Login.tsx
+    │   │       └── Register.tsx
+    │   ├── routers/
+    │   │   ├── index.tsx
+    │   │   ├── PrivateRoutes.tsx
+    │   │   └── PublicRoutes.tsx
     │   ├── services/
-    │   └── App.tsx
+    │   │   ├── api.ts
+    │   │   ├── authService.ts
+    │   │   └── taskService.ts
+    │   ├── utils/
+    │   ├── App.tsx
+    │   └── index.tsx
     └── package.json
 ```
 
@@ -376,6 +275,51 @@ npm run dev
 ```bash
 cd simple-task-tracker-frontend
 npm start
+```
+
+## Testing
+
+### Backend Tests
+The backend includes unit tests for the task service layer.
+
+**Run all backend tests:**
+```bash
+cd simple-task-tracker-backend
+npm test
+```
+
+**Test coverage:**
+- Task Service (`taskService.test.ts`)
+  - Create task
+  - Get tasks by user
+  - Update task
+  - Delete task
+  - Move task position
+
+### Frontend Tests
+The frontend includes component tests using React Testing Library.
+
+**Run all frontend tests:**
+```bash
+cd simple-task-tracker-frontend
+npm test
+```
+
+**Test coverage:**
+- App Component (`App.test.tsx`) - Basic rendering
+- Task Card (`taskCard.*.test.tsx`)
+  - Render test - Component rendering and props
+  - Status tests - TODO, IN PROGRESS, DONE status display
+- Add Task Form (`addTaskForm.submit.test.tsx`) - Form submission
+
+**Run tests in watch mode:**
+```bash
+npm test -- --watch
+```
+
+**Run tests with coverage:**
+```bash
+npm test -- --coverage
 ```
 
 ## Build for Production

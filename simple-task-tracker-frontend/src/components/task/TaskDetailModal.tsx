@@ -97,8 +97,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={10}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
+              <p className={`text-sm mt-1 ${editTitle.length === 10 ? 'text-red-500' : 'text-gray-500'}`}>
+                {editTitle.length}/10 characters {editTitle.length === 10 && '(maximum reached)'}
+              </p>
             </div>
 
             <div>

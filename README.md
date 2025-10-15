@@ -223,41 +223,63 @@ Simple Task Tracker/
 └── simple-task-tracker-frontend/
     ├── public/
     ├── src/
-    │   ├── __tests__/
+    │   ├── __tests__/                    # Unit tests
     │   │   ├── addTaskForm.submit.test.tsx
     │   │   ├── taskCard.render.test.tsx
     │   │   ├── taskCard.todoStatus.test.tsx
     │   │   ├── taskCard.inprogressStatus.test.tsx
     │   │   └── taskCard.doneStatus.test.tsx
-    │   ├── assets/
-    │   ├── components/
-    │   │   ├── addTaskForm.tsx
-    │   │   ├── column.tsx
-    │   │   ├── confirmModal.tsx
-    │   │   ├── popupProvider.tsx
-    │   │   ├── PrivateRoute.tsx
-    │   │   ├── taskCard.tsx
-    │   │   ├── taskDetailModal.tsx
-    │   │   ├── types.ts
-    │   │   └── useTasks.ts
-    │   ├── contexts/
-    │   │   └── AuthContext.tsx
-    │   ├── pages/
+    │   ├── assets/                       # Static resources
+    │   ├── components/                   # React components
+    │   │   ├── common/                   # Reusable UI components
+    │   │   │   ├── ErrorDisplay.tsx
+    │   │   │   ├── LoadingSpinner.tsx
+    │   │   │   └── SearchBar.tsx
+    │   │   ├── layout/                   # Layout components
+    │   │   │   └── PageHeader.tsx
+    │   │   ├── modal/                    # Modal components
+    │   │   │   ├── ConfirmModal.tsx
+    │   │   │   └── PopupProvider.tsx
+    │   │   ├── task/                     # Task-related components
+    │   │   │   ├── AddTaskForm.tsx
+    │   │   │   ├── TaskBoard.tsx
+    │   │   │   ├── TaskCard.tsx
+    │   │   │   ├── TaskColumn.tsx
+    │   │   │   └── TaskDetailModal.tsx
+    │   │   └── PrivateRoute.tsx
+    │   ├── constants/                    # App constants
+    │   │   ├── taskStatus.ts
+    │   │   └── theme.ts
+    │   ├── contexts/                     # React Context (global state)
+    │   │   └── AuthContext.tsx           # Auth state provider + useAuth hook
+    │   ├── hooks/                        # Custom React hooks
+    │   │   ├── useModal.ts
+    │   │   ├── useTasks.ts
+    │   │   ├── useTaskDragDrop.ts
+    │   │   └── useTaskSearch.ts
+    │   ├── pages/                        # Page components
     │   │   ├── private/
     │   │   │   └── Task.tsx
     │   │   └── public/
     │   │       ├── Hero.tsx
     │   │       ├── Login.tsx
     │   │       └── Register.tsx
-    │   ├── routers/
+    │   ├── routers/                      # Route configuration
     │   │   ├── index.tsx
     │   │   ├── PrivateRoutes.tsx
     │   │   └── PublicRoutes.tsx
-    │   ├── services/
+    │   ├── services/                     # API & business logic
     │   │   ├── api.ts
     │   │   ├── authService.ts
     │   │   └── taskService.ts
-    │   ├── utils/
+    │   ├── types/                        # TypeScript type definitions
+    │   │   ├── auth.types.ts
+    │   │   ├── component.types.ts
+    │   │   ├── task.types.ts
+    │   │   └── index.ts
+    │   ├── utils/                        # Utility functions
+    │   │   ├── errorHandler.ts
+    │   │   └── taskFilter.ts
     │   ├── App.tsx
     │   └── index.tsx
     └── package.json

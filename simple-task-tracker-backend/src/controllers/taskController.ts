@@ -16,7 +16,7 @@ export async function createTask(req: Request, res: Response): Promise<void> {
     const task = await taskService.createTask(userId, title, description)
     res.status(201).json(task)
   } catch (error) {
-    console.error('Prisma createTask error:', error)
+    console.error('CreateTask error:', error)
     res.status(500).json({
       error: 'Failed to create task',
       details: error instanceof Error ? error.message : String(error),
@@ -141,7 +141,6 @@ export async function deleteTask(req: Request, res: Response): Promise<void> {
       res.status(400).json({ error: 'Invalid task ID' })
       return
     }
-
     await taskService.deleteTask(id)
     res.status(204).send()
   } catch (error) {

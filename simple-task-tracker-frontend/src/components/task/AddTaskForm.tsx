@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { AddTaskFormProps } from '../types'
+import { AddTaskFormProps } from '../../types'
+import { TASK_STATUS } from '../../constants/taskStatus'
 
 const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen }) => {
   const [title, setTitle] = useState('')
@@ -7,13 +8,13 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!title.trim()) return
 
     onAddTask({
       title: title.trim(),
       description: description.trim() || undefined,
-      status: 'TODO'
+      status: TASK_STATUS.TODO
     })
 
     // Reset form

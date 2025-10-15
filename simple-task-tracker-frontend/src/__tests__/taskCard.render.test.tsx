@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import TaskCard from '../components/taskCard';
-import PopupProvider from '../components/popupProvider';
+import TaskCard from '../components/task/TaskCard';
+import PopupProvider from '../components/modal/PopupProvider';
 import { Task } from '../types';
 
-jest.mock('../components/popupProvider', () => ({
+jest.mock('../components/modal/PopupProvider', () => ({
   ...jest.requireActual('../components/popupProvider'),
   usePopup: () => ({
     confirm: jest.fn().mockResolvedValue(true),

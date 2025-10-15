@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react'
-import ConfirmModal from './confirmModal'
-import { ConfirmOptions, PopupContextValue } from '../types'
+import ConfirmModal from './ConfirmModal'
+import { ConfirmOptions, PopupContextValue } from '../../types'
 
 const PopupContext = createContext<PopupContextValue | undefined>(undefined)
 

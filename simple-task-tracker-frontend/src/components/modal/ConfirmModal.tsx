@@ -1,5 +1,5 @@
 import React from 'react'
-import { ConfirmModalProps } from '../types'
+import { ConfirmModalProps } from '../../types'
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,

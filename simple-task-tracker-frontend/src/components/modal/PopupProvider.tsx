@@ -1,16 +1,6 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react'
-import ConfirmModal from './confirmModal'
-
-export interface ConfirmOptions {
-  title?: string
-  message: string
-  confirmLabel?: string
-  cancelLabel?: string
-}
-
-interface PopupContextValue {
-  confirm: (options: ConfirmOptions) => Promise<boolean>
-}
+import ConfirmModal from './ConfirmModal'
+import { ConfirmOptions, PopupContextValue } from '../../types'
 
 const PopupContext = createContext<PopupContextValue | undefined>(undefined)
 

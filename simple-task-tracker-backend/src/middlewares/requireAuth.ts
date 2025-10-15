@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../utils/supabaseClient'
 import * as userService from '../services/userService'
+import { extractToken } from '../utils/tokenHelper'
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const auth = req.headers.authorization || ''
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+    const token = extractToken(req)
 
     if (!token) {
       res.status(401).json({ error: 'No token provided' })

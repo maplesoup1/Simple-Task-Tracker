@@ -1,11 +1,6 @@
 import React, { useState } from 'react'
-import { Task } from './types'
-
-interface AddTaskFormProps {
-  onAddTask: (task: Omit<Task, 'id'>) => void
-  onClose: () => void
-  isOpen: boolean
-}
+import { AddTaskFormProps } from '../../types'
+import { TASK_STATUS } from '../../constants/taskStatus'
 
 const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen }) => {
   const [title, setTitle] = useState('')
@@ -13,13 +8,13 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!title.trim()) return
 
     onAddTask({
       title: title.trim(),
       description: description.trim() || undefined,
-      status: 'TODO'
+      status: TASK_STATUS.TODO
     })
 
     // Reset form
@@ -59,10 +54,14 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen })
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              maxLength={10}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               placeholder="Enter task title"
               required
             />
+            <p className={`text-sm mt-1 ${title.length === 10 ? 'text-red-500' : 'text-gray-500'}`}>
+              {title.length}/10 characters {title.length === 10 && '(maximum reached)'}
+            </p>
           </div>
 
           <div>

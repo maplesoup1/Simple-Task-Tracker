@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react'
-import { Task } from './types'
-import { usePopup } from './popupProvider'
+import { TaskDetailModalProps } from '../../types'
+import { usePopup } from '../modal/PopupProvider'
+import { STATUS_LABELS } from '../../constants/taskStatus'
+import { getStatusTheme } from '../../constants/theme'
+import type { Task } from '../../types'
 
-interface TaskDetailModalProps {
-  task: Task | null
-  isOpen: boolean
-  onClose: () => void
-  onUpdate: (taskId: number, updates: Partial<Omit<Task, 'id'>>) => void
-  onDelete: (taskId: number) => void
-}
-
-const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ 
-  task, 
-  isOpen, 
-  onClose, 
-  onUpdate, 
-  onDelete 
+const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
+  task,
+  isOpen,
+  onClose,
+  onUpdate,
+  onDelete
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editStatus, setEditStatus] = useState<'TODO' | 'INPROGRESS' | 'DONE'>('TODO')
+  const [editStatus, setEditStatus] = useState<Task['status']>('TODO')
   const { confirm } = usePopup()
 
   useEffect(() => {
@@ -32,18 +27,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   }, [task])
 
   if (!isOpen || !task) return null
-
-  const statusLabels = {
-    TODO: 'To Do',
-    INPROGRESS: 'In Progress',
-    DONE: 'Done'
-  }
-
-  const statusColors = {
-    TODO: 'bg-pink-100 text-pink-800 border-pink-200',
-    INPROGRESS: 'bg-orange-100 text-orange-800 border-orange-200',
-    DONE: 'bg-green-100 text-green-800 border-green-200'
-  }
 
   const handleSave = () => {
     if (!editTitle.trim()) return
@@ -76,6 +59,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       onClose()
     }
   }
+
+  const theme = getStatusTheme(task.status)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
@@ -112,8 +97,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={10}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
+              <p className={`text-sm mt-1 ${editTitle.length === 10 ? 'text-red-500' : 'text-gray-500'}`}>
+                {editTitle.length}/10 characters {editTitle.length === 10 && '(maximum reached)'}
+              </p>
             </div>
 
             <div>
@@ -130,12 +119,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value as 'TODO' | 'INPROGRESS' | 'DONE')}
+                onChange={(e) => setEditStatus(e.target.value as Task['status'])}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               >
-                <option value="TODO">To Do</option>
-                <option value="INPROGRESS">In Progress</option>
-                <option value="DONE">Done</option>
+                {Object.entries(STATUS_LABELS).map(([status, label]) => (
+                  <option key={status} value={status}>{label}</option>
+                ))}
               </select>
             </div>
 
@@ -167,8 +156,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium border ${statusColors[task.status]}`}>
-                {statusLabels[task.status]}
+              <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium border ${theme.statusBadge}`}>
+                {STATUS_LABELS[task.status]}
               </span>
             </div>
 

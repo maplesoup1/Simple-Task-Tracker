@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import TaskCard from '../components/taskCard';
-import PopupProvider from '../components/popupProvider';
-import { Task } from '../components/types';
+import TaskCard from '../components/task/TaskCard';
+import PopupProvider from '../components/modal/PopupProvider';
+import { Task } from '../types';
 
-jest.mock('../components/popupProvider', () => ({
+jest.mock('../components/modal/PopupProvider', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   usePopup: () => ({

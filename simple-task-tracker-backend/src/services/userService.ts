@@ -1,12 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export async function createUser(id: string, name?: string) {
-  return await prisma.user.create({
-    data: { id, name, email: '' },
-  });
-}
-
 // Idempotent user sync - upsert user from Supabase
 export async function syncUser(id: string, email: string, name?: string) {
   return await prisma.user.upsert({

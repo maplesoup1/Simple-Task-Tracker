@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import * as userService from '../services/userService';
-import { supabase } from '../utils/supabaseClient';
+import { extractToken } from '../utils/tokenHelper';
 
 // POST /auth/signup
 export async function signup(req: Request, res: Response): Promise<void> {
@@ -19,32 +19,12 @@ export async function signup(req: Request, res: Response): Promise<void> {
 }
 
 // POST /auth/sync - Idempotent user sync
+// Note: This endpoint uses requireAuth middleware which handles token validation and user sync
 export async function syncUser(req: Request, res: Response): Promise<void> {
   try {
-    const auth = req.headers.authorization || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-
-    if (!token) {
-      res.status(401).json({ error: 'No token provided' });
-      return;
-    }
-
-    // Verify JWT and get user info from Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      res.status(401).json({ error: 'Invalid or expired token' });
-      return;
-    }
-
-    // Upsert user to local database
-    const syncedUser = await userService.syncUser(
-      user.id,
-      user.email || '',
-      user.user_metadata?.name
-    );
-
-    res.json(syncedUser);
+    // User is already synced by requireAuth middleware
+    const user = await userService.getUserById(req.userId!);
+    res.json(user);
   } catch (error) {
     console.error('Sync user error:', error);
     res.status(500).json({ error: 'Failed to sync user' });
@@ -69,8 +49,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 // POST /auth/logout
 export async function logout(req: Request, res: Response): Promise<void> {
   try {
-    const auth = req.headers.authorization || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const token = extractToken(req);
     await authService.logout(token);
     res.status(204).send();
   } catch (error) {

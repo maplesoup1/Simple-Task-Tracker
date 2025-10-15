@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Task } from './types'
+import { Task } from '../types'
 import * as taskService from '../services/taskService'
 
 export const useTasks = () => {

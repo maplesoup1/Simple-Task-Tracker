@@ -1,11 +1,5 @@
 import React, { useState } from 'react'
-import { Task } from './types'
-
-interface AddTaskFormProps {
-  onAddTask: (task: Omit<Task, 'id'>) => void
-  onClose: () => void
-  isOpen: boolean
-}
+import { AddTaskFormProps } from '../types'
 
 const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask, onClose, isOpen }) => {
   const [title, setTitle] = useState('')

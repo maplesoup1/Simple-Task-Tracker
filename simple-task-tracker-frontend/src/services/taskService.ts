@@ -1,11 +1,5 @@
 import apiClient from './api'
-import { Task } from '../components/types'
-
-export interface TasksResponse {
-  TODO: Task[]
-  INPROGRESS: Task[]
-  DONE: Task[]
-}
+import { Task, TasksResponse } from '../types'
 
 // Get all tasks grouped by status
 export const getTasks = async (): Promise<TasksResponse> => {

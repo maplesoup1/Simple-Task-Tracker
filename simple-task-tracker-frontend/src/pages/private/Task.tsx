@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import { DragDropContext, DropResult } from '@hello-pangea/dnd'
-import { Task as TaskType } from '../../components/types'
 import { useTasks } from '../../components/useTasks'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePopup } from '../../components/popupProvider'
 import Column from '../../components/column'
 import AddTaskForm from '../../components/addTaskForm'
 import TaskDetailModal from '../../components/taskDetailModal'
+import type { Task } from '../../types'
 
-const Task = () => {
+const TaskPage = () => {
   const { logout } = useAuth()
   const { confirm } = usePopup()
   const {
@@ -40,7 +40,7 @@ const Task = () => {
       return
     }
 
-    moveTask(parseInt(draggableId), destination.droppableId as TaskType['status'])
+    moveTask(parseInt(draggableId), destination.droppableId as Task['status'])
   }
 
   const handleTaskClick = (taskId: number) => {
@@ -67,7 +67,7 @@ const Task = () => {
   }
 
   // Filter tasks by search query
-  const filterTasks = (status: TaskType['status']) => {
+  const filterTasks = (status: Task['status']) => {
     const tasksInStatus = getTasksByStatus(status)
     if (!searchQuery.trim()) {
       return tasksInStatus
@@ -85,7 +85,7 @@ const Task = () => {
 
   const totalTaskCount = tasks.length
 
-  const columnsConfig: Array<{ title: string; status: TaskType['status'] }> = [
+  const columnsConfig: Array<{ title: string; status: Task['status'] }> = [
     { title: 'To Do', status: 'TODO' },
     { title: 'In Progress', status: 'INPROGRESS' },
     { title: 'Done', status: 'DONE' }
@@ -217,4 +217,4 @@ const Task = () => {
   )
 }
 
-export default Task
+export default TaskPage

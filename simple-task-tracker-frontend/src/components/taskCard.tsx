@@ -1,15 +1,7 @@
 import React from 'react'
 import { Draggable } from '@hello-pangea/dnd'
-import { Task } from './types'
+import { TaskCardProps } from '../types'
 import { usePopup } from './popupProvider'
-
-interface TaskCardProps {
-  task: Task
-  index: number
-  onDelete: (id: number) => void
-  onTaskClick?: (id: number) => void
-  isDragDisabled?: boolean
-}
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, index, onDelete, onTaskClick, isDragDisabled = false }) => {
   const { confirm } = usePopup()

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import TaskCard from '../components/taskCard';
 import PopupProvider from '../components/popupProvider';
-import { Task } from '../components/types';
+import { Task } from '../types';
 
 jest.mock('../components/popupProvider', () => ({
   __esModule: true,

@@ -1,21 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import apiClient from './api'
+import { User, AuthResponse } from '../types'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL!
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-export interface User {
-  id: string
-  email: string
-  name?: string
-}
-
-export interface AuthResponse {
-  user: User
-  token: string
-}
 
 // Sync user to backend database
 const syncUserToBackend = async (token: string): Promise<void> => {

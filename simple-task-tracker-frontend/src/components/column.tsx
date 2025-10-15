@@ -1,17 +1,7 @@
 import React from 'react'
 import { Droppable } from '@hello-pangea/dnd'
-import { Task } from './types'
+import { ColumnProps } from '../types'
 import TaskCard from './taskCard'
-
-interface ColumnProps {
-  title: string
-  status: 'TODO' | 'INPROGRESS' | 'DONE'
-  tasks: Task[]
-  totalTaskCount: number
-  onDelete: (id: number) => void
-  onTaskClick?: (id: number) => void
-  isDragDisabled?: boolean
-}
 
 const Column: React.FC<ColumnProps> = ({ title, status, tasks, totalTaskCount, onDelete, onTaskClick, isDragDisabled = false }) => {
   const getColumnColor = () => {

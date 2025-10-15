@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Task } from './types'
+import { TaskDetailModalProps } from '../types'
 import { usePopup } from './popupProvider'
-
-interface TaskDetailModalProps {
-  task: Task | null
-  isOpen: boolean
-  onClose: () => void
-  onUpdate: (taskId: number, updates: Partial<Omit<Task, 'id'>>) => void
-  onDelete: (taskId: number) => void
-}
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ 
   task, 

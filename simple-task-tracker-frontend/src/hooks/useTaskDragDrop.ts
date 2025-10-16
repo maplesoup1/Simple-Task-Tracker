@@ -3,7 +3,7 @@ import type { DropResult } from '@hello-pangea/dnd'
 import type { Task } from '../types'
 
 interface UseTaskDragDropProps {
-  onTaskMove: (taskId: number, newStatus: Task['status']) => Promise<void>
+  onTaskMove: (taskId: number, newStatus: Task['status'], destinationIndex: number) => Promise<void>
   disabled?: boolean
 }
 
@@ -25,11 +25,12 @@ export const useTaskDragDrop = ({ onTaskMove, disabled = false }: UseTaskDragDro
       return
     }
 
-    // Move the task to the new status
+    // Move the task to the new status and position
     const taskId = parseInt(draggableId)
     const newStatus = destination.droppableId as Task['status']
+    const destinationIndex = destination.index
 
-    onTaskMove(taskId, newStatus)
+    onTaskMove(taskId, newStatus, destinationIndex)
   }, [onTaskMove, disabled])
 
   return {

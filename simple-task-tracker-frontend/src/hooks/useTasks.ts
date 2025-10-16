@@ -20,6 +20,7 @@ type TaskAction =
   | { type: 'UPDATE_TASK'; payload: { id: number; updates: Partial<Task> } }
   | { type: 'DELETE_TASK'; payload: number }
   | { type: 'REPLACE_TASK'; payload: { tempId: number; task: Task } }
+  | { type: 'MOVE_TASK'; payload: { taskId: number; newStatus: Task['status']; destinationIndex: number } }
 
 // Reducer
 const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
@@ -57,6 +58,35 @@ const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
           task.id === action.payload.tempId ? action.payload.task : task
         ),
       }
+
+    case 'MOVE_TASK': {
+      const { taskId, newStatus, destinationIndex } = action.payload
+
+      // Find the task being moved
+      const taskToMove = state.tasks.find(t => t.id === taskId)
+      if (!taskToMove) return state
+
+      // Remove the task from the array
+      const tasksWithoutMoved = state.tasks.filter(t => t.id !== taskId)
+
+      // Get tasks in the destination status
+      const destinationTasks = tasksWithoutMoved.filter(t => t.status === newStatus)
+      const otherTasks = tasksWithoutMoved.filter(t => t.status !== newStatus)
+
+      // Insert the task at the destination index
+      const movedTask = { ...taskToMove, status: newStatus }
+      const newDestinationTasks = [
+        ...destinationTasks.slice(0, destinationIndex),
+        movedTask,
+        ...destinationTasks.slice(destinationIndex)
+      ]
+
+      // Combine all tasks
+      return {
+        ...state,
+        tasks: [...otherTasks, ...newDestinationTasks]
+      }
+    }
 
     default:
       return state
@@ -189,19 +219,28 @@ export const useTasks = () => {
   // Move task (drag and drop)
   const moveTask = useCallback(async (
     taskId: number,
-    newStatus: Task['status']
+    newStatus: Task['status'],
+    destinationIndex: number
   ) => {
+    const originalTasks = state.tasks
     const originalTask = state.tasks.find(t => t.id === taskId)
     if (!originalTask) return
 
-    // Optimistic update
-    dispatch({ type: 'UPDATE_TASK', payload: { id: taskId, updates: { status: newStatus } } })
+    // Get tasks in the destination status (excluding the dragged task if it's in the same column)
+    const tasksInDestination = filterByStatus(state.tasks, newStatus).filter(t => t.id !== taskId)
+
+    // Calculate beforeId and afterId based on destination index
+    const beforeId = destinationIndex > 0 ? tasksInDestination[destinationIndex - 1]?.id : null
+    const afterId = tasksInDestination[destinationIndex]?.id || null
+
+    // Optimistic update - move task in the UI
+    dispatch({ type: 'MOVE_TASK', payload: { taskId, newStatus, destinationIndex } })
 
     try {
-      await taskService.moveTask(taskId, newStatus)
+      await taskService.moveTask(taskId, newStatus, beforeId, afterId)
     } catch (err: any) {
-      // Rollback on error
-      dispatch({ type: 'UPDATE_TASK', payload: { id: taskId, updates: { status: originalTask.status } } })
+      // Rollback on error - restore original task list
+      dispatch({ type: 'SET_TASKS', payload: originalTasks })
       const errorMessage = getErrorMessage(err, ERROR_MESSAGES.MOVE_TASK)
       dispatch({ type: 'SET_ERROR', payload: errorMessage })
       logError('moveTask', err)

@@ -70,9 +70,10 @@ link: https://github.com/hello-pangea/dnd
 ## design tradeoffs
 Temporarily disabling Supabase registration email verification.
 More like a personal task tracker, tasks cannot be shared among multiple users.
-Currently using the Context API; if functionality is expanded, Redux may be required.
+Currently using useReducer without Context API (not global state); if multi-page task sharing is needed, Context or Redux migration would be required.
 Currently refreshing data manually, not using Supabase Realtime.
-
+Frontend uses Create React App (CRA) instead of Vite; slower dev server startup but sufficient for current project scale.
+No UI component library, using Tailwind CSS with custom components for lightweight bundle size.
 ## Installation
 
 ### 1. Clone the repository
